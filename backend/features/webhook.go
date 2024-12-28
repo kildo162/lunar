@@ -64,21 +64,42 @@ func getTodayDateInfo() string {
 		Month: int(now.Month()),
 		Year:  now.Year(),
 	})
-	return fmt.Sprintf("Today's date:\nGregorian: %s\nLunar: %s",
-		calendar.ToSolar().Format(),
-		calendar.ToLunar().Format())
+	solarDate := calendar.ToSolar()
+	lunarDate := calendar.ToLunar()
+	return fmt.Sprintf("Today's date:\n\nSolar Calendar:\n%s\n\nLunar Calendar:\n%s",
+		formatSolarDate(solarDate),
+		formatLunarDate(lunarDate))
+}
+
+func formatSolarDate(sd *calendar.SolarDate) string {
+	return fmt.Sprintf("Date: %s\nYear Info: %s\nDetail: %s",
+		sd.Format(),
+		sd.YearInfo(),
+		sd.Detail())
+}
+
+func formatLunarDate(ld *calendar.LunarDate) string {
+	return fmt.Sprintf("Date: %s\nYear Info: %s",
+		ld.Format(),
+		ld.YearInfo())
 }
 
 func getYearInfo() string {
 	now := time.Now()
 	solarDate := calendar.NewSolarDate(now.Year(), int(now.Month()), now.Day())
-	return solarDate.YearInfo()
+	lunarDate := calendar.NewLunarDate(now.Year(), int(now.Month()), now.Day())
+	return fmt.Sprintf("Solar Year Info: %s\nLunar Year Info: %s",
+		solarDate.YearInfo(),
+		lunarDate.YearInfo())
 }
 
 func getDetailDayInfo() string {
 	now := time.Now()
 	solarDate := calendar.NewSolarDate(now.Year(), int(now.Month()), now.Day())
-	return solarDate.Detail()
+	lunarDate := calendar.NewLunarDate(now.Year(), int(now.Month()), now.Day())
+	return fmt.Sprintf("Solar Detail: %s\nLunar Detail: %s",
+		solarDate.Detail(),
+		lunarDate.Format())
 }
 
 func getNextDayInfo() string {
