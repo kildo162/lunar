@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"strings"
 )
 
 var TelegramBot *Telegram
@@ -32,6 +34,31 @@ func (t *Telegram) SendMessage(message string) error {
 
 	payload := map[string]string{
 		"chat_id": t.ChatIDs[0],
+		"text":    message,
+	}
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("error encoding payload: %v", err)
+	}
+
+	apiURL := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", t.BotToken)
+	resp, err := http.Post(apiURL, "application/json", bytes.NewBuffer(payloadBytes))
+	if err != nil {
+		return fmt.Errorf("error sending request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("error: %s", resp.Status)
+	}
+
+	log.Println("Message sent successfully!")
+	return nil
+}
+
+func (t *Telegram) SendMessageToChatID(chatID, message string) error {
+	payload := map[string]string{
+		"chat_id": chatID,
 		"text":    message,
 	}
 	payloadBytes, err := json.Marshal(payload)
@@ -112,6 +139,16 @@ func (t *Telegram) SetWebhook(url string) error {
 	}
 
 	return nil
+}
+
+func (t *Telegram) InitChatIDsFromEnv() {
+	chatIDs := os.Getenv("TELEGRAM_CHAT_IDS")
+	if chatIDs == "" {
+		log.Println("No chat IDs found in environment variables")
+		return
+	}
+	t.ChatIDs = strings.Split(chatIDs, ",")
+	log.Printf("Initialized chat IDs from environment variables: %v", t.ChatIDs)
 }
 
 type TelegramUpdate struct {

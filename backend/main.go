@@ -26,6 +26,7 @@ func main() {
 		log.Fatal("Failed to initialize Telegram bot")
 	} else {
 		log.Println("Telegram bot initialized successfully")
+		shared.TelegramBot.InitChatIDsFromEnv()
 	}
 
 	// Send deployment success message
