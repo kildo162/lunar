@@ -38,8 +38,8 @@ func NewCalendar(date CalendarDate) *Calendar {
 	leapYear := c.isLeapYear()
 	c.LeapYear = &leapYear
 
-	c.GetSolarDate()
-	c.GetLunarDate()
+	c.SoalrDate = NewSolarDate(c.Year, c.Month, c.Day)
+	c.LunarDate = NewLunarDate(c.Year, c.Month, c.Day)
 	return c
 }
 
@@ -71,18 +71,10 @@ func (c *Calendar) calculateJD() float64 {
 	return float64(INT(365.25*float64(year))) + float64(INT(30.6001*float64(month+1))) + float64(day) + 1720994.5 + float64(B)
 }
 
-func (c *Calendar) ToLunar() *LunarDate {
-	return c.LunarDate
-}
-
-func (c *Calendar) GetSolarDate() {
-	c.SoalrDate = NewSolarDate(c.Year, c.Month, c.Day)
-}
-
-func (c *Calendar) GetLunarDate() {
-	c.LunarDate = c.ToLunar()
-}
-
 func (c *Calendar) ToSolar() *SolarDate {
 	return c.SoalrDate
+}
+
+func (c *Calendar) ToLunar() *LunarDate {
+	return c.LunarDate
 }

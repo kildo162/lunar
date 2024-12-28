@@ -66,9 +66,11 @@ func getTodayDateInfo() string {
 	})
 	solarDate := calendar.ToSolar()
 	lunarDate := calendar.ToLunar()
-	return fmt.Sprintf("Today's date:\n\nSolar Calendar: %s\nLunar Calendar: %s",
+	return fmt.Sprintf("Today's date:\n\nSolar Calendar: %s\nLunar Calendar: %s\nJD: %d\nLeap Year: %t",
 		formatSolarDate(solarDate),
-		formatLunarDate(lunarDate))
+		formatLunarDate(lunarDate),
+		now.YearDay(),
+		solarDate.IsLeapYear())
 }
 
 func formatSolarDate(sd *calendar.SolarDate) string {
