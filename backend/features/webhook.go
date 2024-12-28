@@ -66,9 +66,9 @@ func getTodayDateInfo() string {
 	})
 	solarDate := calendar.ToSolar()
 	lunarDate := calendar.ToLunar()
-	return fmt.Sprintf("Today's date:\n\n%-20s %s\n%-20s %s",
-		"Solar Calendar:", formatSolarDate(solarDate),
-		"Lunar Calendar:", formatLunarDate(lunarDate))
+	return fmt.Sprintf("Today's date:\n\nSolar Calendar: %s\nLunar Calendar: %s",
+		formatSolarDate(solarDate),
+		formatLunarDate(lunarDate))
 }
 
 func formatSolarDate(sd *calendar.SolarDate) string {
@@ -86,8 +86,13 @@ func formatLunarDate(ld *calendar.LunarDate) string {
 
 func getYearInfo() string {
 	now := time.Now()
-	solarDate := calendar.NewSolarDate(now.Year(), int(now.Month()), now.Day())
-	lunarDate := calendar.NewLunarDate(now.Year(), int(now.Month()), now.Day())
+	calendar := calendar.NewCalendar(calendar.CalendarDate{
+		Day:   now.Day(),
+		Month: int(now.Month()),
+		Year:  now.Year(),
+	})
+	solarDate := calendar.ToSolar()
+	lunarDate := calendar.ToLunar()
 	return fmt.Sprintf("Solar Year Info: %s\nLunar Year Info: %s",
 		solarDate.YearInfo(),
 		lunarDate.YearInfo())
@@ -99,7 +104,7 @@ func getDetailDayInfo() string {
 	lunarDate := calendar.NewLunarDate(now.Year(), int(now.Month()), now.Day())
 	return fmt.Sprintf("Solar Detail: %s\nLunar Detail: %s",
 		solarDate.Detail(),
-		lunarDate.Format())
+		lunarDate.FormatDetailed())
 }
 
 func getNextDayInfo() string {
