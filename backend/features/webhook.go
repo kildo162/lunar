@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 )
 
 func HandleWebhook(w http.ResponseWriter, r *http.Request) {
@@ -38,7 +39,16 @@ func HandleWebhook(w http.ResponseWriter, r *http.Request) {
 			log.Printf("Sent message: %s", responseMessage)
 		}
 	case "/help":
-		responseMessage := "Available commands: /hello, /info, /help"
+		responseMessage := "Available commands: /hello, /info, /help, /today"
+		err := shared.TelegramBot.SendMessageToChatID(fmt.Sprintf("%d", update.Message.Chat.ID), responseMessage)
+		if err != nil {
+			log.Printf("Error sending message: %v", err)
+		} else {
+			log.Printf("Sent message: %s", responseMessage)
+		}
+	case "/today":
+		gregorianDate := time.Now().Format("2006-01-02")
+		responseMessage := fmt.Sprintf("Today's date:\nGregorian: %s\nLunar: %s", gregorianDate, "N/A")
 		err := shared.TelegramBot.SendMessageToChatID(fmt.Sprintf("%d", update.Message.Chat.ID), responseMessage)
 		if err != nil {
 			log.Printf("Error sending message: %v", err)
