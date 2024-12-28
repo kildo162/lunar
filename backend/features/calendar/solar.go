@@ -1,6 +1,7 @@
 package calendar
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -38,4 +39,19 @@ func (sd *SolarDate) GetWeekOfYear() int {
 func (sd *SolarDate) GetWeekday() time.Weekday {
 	currentDate := time.Date(sd.Year, time.Month(sd.Month), sd.Day, 0, 0, 0, 0, time.UTC)
 	return currentDate.Weekday()
+}
+
+func (sd *SolarDate) Format() string {
+	return fmt.Sprintf("%02d-%02d-%d", sd.Day, sd.Month, sd.Year)
+}
+
+func (sd *SolarDate) Detail() string {
+	return fmt.Sprintf(
+		"Year: %d, Month: %d, Day: %d, Week of Year: %d, Day of Year: %d",
+		sd.Year, sd.Month, sd.Day, sd.GetWeekOfYear(), sd.GetDayOfYear(),
+	)
+}
+
+func (sd *SolarDate) YearInfo() string {
+	return fmt.Sprintf("Year: %d, Leap Year: %t", sd.Year, sd.IsLeapYear())
 }

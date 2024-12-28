@@ -101,3 +101,21 @@ func (c *Calendar) GetLunarDate() *LunarDate {
 	// ...existing code...
 	return &LunarDate{} // Placeholder
 }
+
+func (c *Calendar) GetSolarTerm() string {
+	// Logic to get the solar term
+	// ...existing code...
+	return "" // Placeholder
+}
+
+func (c *Calendar) ToSolar() *SolarDate {
+	// Conversion logic from lunar to solar date
+	// ...existing code...
+	return &SolarDate{} // Placeholder
+}
+
+func (c *Calendar) FromSolar(solarDate *SolarDate) *Calendar {
+	// Conversion logic from solar to lunar date
+	// ...existing code...
+	return &Calendar{} // Placeholder
+}

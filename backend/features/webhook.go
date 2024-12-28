@@ -13,73 +13,78 @@ import (
 func HandleWebhook(w http.ResponseWriter, r *http.Request) {
 	var update shared.TelegramUpdate
 	if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
-		response := shared.NewError(shared.BAD_REQUEST.Code(), "Invalid request payload")
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
+		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
-	// Process the update from Telegram
 	log.Printf("Received update: %+v", update)
 
-	// Handle commands
-	switch update.Message.Text {
-	case "/hello":
-		responseMessage := "Hello! How can I assist you today?"
-		err := shared.TelegramBot.SendMessageToChatID(fmt.Sprintf("%d", update.Message.Chat.ID), responseMessage)
-		if err != nil {
-			log.Printf("Error sending message: %v", err)
-		} else {
-			log.Printf("Sent message: %s", responseMessage)
-		}
-	case "/info":
-		responseMessage := "This is a bot that helps you with various tasks."
-		err := shared.TelegramBot.SendMessageToChatID(fmt.Sprintf("%d", update.Message.Chat.ID), responseMessage)
-		if err != nil {
-			log.Printf("Error sending message: %v", err)
-		} else {
-			log.Printf("Sent message: %s", responseMessage)
-		}
-	case "/help":
-		responseMessage := "Available commands: /hello, /info, /help, /today"
-		err := shared.TelegramBot.SendMessageToChatID(fmt.Sprintf("%d", update.Message.Chat.ID), responseMessage)
-		if err != nil {
-			log.Printf("Error sending message: %v", err)
-		} else {
-			log.Printf("Sent message: %s", responseMessage)
-		}
-	case "/today":
-		responseMessage := getTodayDateInfo()
-		err := shared.TelegramBot.SendMessageToChatID(fmt.Sprintf("%d", update.Message.Chat.ID), responseMessage)
-		if err != nil {
-			log.Printf("Error sending message: %v", err)
-		} else {
-			log.Printf("Sent message: %s", responseMessage)
-		}
-	default:
-		responseMessage := "Unknown command. Type /help for a list of available commands."
-		err := shared.TelegramBot.SendMessageToChatID(fmt.Sprintf("%d", update.Message.Chat.ID), responseMessage)
-		if err != nil {
-			log.Printf("Error sending message: %v", err)
-		} else {
-			log.Printf("Sent message: %s", responseMessage)
-		}
+	responseMessage := handleCommand(update.Message.Text)
+	err := shared.TelegramBot.SendMessageToChatID(fmt.Sprintf("%d", update.Message.Chat.ID), responseMessage)
+	if err != nil {
+		log.Printf("Error sending message: %v", err)
+	} else {
+		log.Printf("Sent message: %s", responseMessage)
 	}
 
-	response := shared.OK
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(shared.OK)
+}
+
+func handleCommand(command string) string {
+	switch command {
+	case "/hello":
+		return "Hello! How can I assist you today?"
+	case "/info":
+		return "This is a bot that helps you with various tasks."
+	case "/help":
+		return "Available commands: /hello, /info, /help, /today, /year, /detail, /nextday"
+	case "/today":
+		return getTodayDateInfo()
+	case "/year":
+		return getYearInfo()
+	case "/detail":
+		return getDetailDayInfo()
+	case "/nextday":
+		return getNextDayInfo()
+	default:
+		return "Unknown command. Type /help for a list of available commands."
+	}
+}
+
+func respondWithError(w http.ResponseWriter, code int, message string) {
+	response := shared.NewError(shared.BAD_REQUEST.Code(), message)
+	w.WriteHeader(code)
 	json.NewEncoder(w).Encode(response)
 }
 
 func getTodayDateInfo() string {
 	now := time.Now()
-	solarDate := calendar.NewCalendar(calendar.CalendarDate{
+	calendar := calendar.NewCalendar(calendar.CalendarDate{
 		Day:   now.Day(),
 		Month: int(now.Month()),
 		Year:  now.Year(),
 	})
-	lunarDate := solarDate.ToLunar()
+	return fmt.Sprintf("Today's date:\nGregorian: %s\nLunar: %s",
+		calendar.ToSolar().Format(),
+		calendar.ToLunar().Format())
+}
 
-	return fmt.Sprintf("Today's date:\nGregorian: %d-%02d-%02d\nLunar: %d-%02d-%02d",
-		solarDate.Year, solarDate.Month, solarDate.Day,
-		lunarDate.Year, lunarDate.Month, lunarDate.Day)
+func getYearInfo() string {
+	now := time.Now()
+	solarDate := calendar.NewSolarDate(now.Year(), int(now.Month()), now.Day())
+	return solarDate.YearInfo()
+}
+
+func getDetailDayInfo() string {
+	now := time.Now()
+	solarDate := calendar.NewSolarDate(now.Year(), int(now.Month()), now.Day())
+	return solarDate.Detail()
+}
+
+func getNextDayInfo() string {
+	now := time.Now().AddDate(0, 0, 1)
+	solarDate := calendar.NewSolarDate(now.Year(), int(now.Month()), now.Day())
+	return fmt.Sprintf("Next day's date:\nGregorian: %s\nLunar: %s",
+		solarDate.Format(),
+		calendar.NewLunarDate(now.Year(), int(now.Month()), now.Day()).Format())
 }
