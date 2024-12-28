@@ -25,31 +25,33 @@ func (t *Telegram) AddChatID(chatID string) {
 	t.ChatIDs = append(t.ChatIDs, chatID)
 }
 
-func (t *Telegram) SendMessage(message string) {
-	// Tạo payload để gửi request
+func (t *Telegram) SendMessage(message string) error {
+	if len(t.ChatIDs) == 0 {
+		return fmt.Errorf("no chat IDs available")
+	}
+
 	payload := map[string]string{
 		"chat_id": t.ChatIDs[0],
 		"text":    message,
 	}
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
-		log.Fatalf("Error encoding payload: %v", err)
+		return fmt.Errorf("error encoding payload: %v", err)
 	}
 
-	// Gửi HTTP POST request
 	apiURL := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", t.BotToken)
 	resp, err := http.Post(apiURL, "application/json", bytes.NewBuffer(payloadBytes))
 	if err != nil {
-		log.Fatalf("Error sending request: %v", err)
+		return fmt.Errorf("error sending request: %v", err)
 	}
 	defer resp.Body.Close()
 
-	// Kiểm tra phản hồi từ Telegram
-	if resp.StatusCode == http.StatusOK {
-		log.Println("Tin nhắn đã được gửi thành công!")
-	} else {
-		log.Printf("Lỗi: %s\n", resp.Status)
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("error: %s", resp.Status)
 	}
+
+	log.Println("Message sent successfully!")
+	return nil
 }
 
 func (t *Telegram) InitAllChatIDs() {
@@ -131,7 +133,7 @@ type TelegramUpdate struct {
 		Entities []struct {
 			Type   string `json:"type"`
 			Offset int    `json:"offset"`
-			Length int    `json:"length"`
+			Length int    `json://length"`
 		} `json:"entities"`
 	} `json:"message"`
 }
