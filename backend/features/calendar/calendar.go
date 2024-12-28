@@ -2,7 +2,6 @@ package calendar
 
 import (
 	"math"
-	"time"
 )
 
 type CalendarDate struct {
@@ -23,6 +22,9 @@ type Calendar struct {
 	Year     int
 	JD       *float64 // Julian Date, used for astronomical calculations
 	LeapYear *bool    // Indicates if the year is a leap year
+
+	SoalrDate *SolarDate
+	LunarDate *LunarDate
 }
 
 func NewCalendar(date CalendarDate) *Calendar {
@@ -35,6 +37,9 @@ func NewCalendar(date CalendarDate) *Calendar {
 	c.JD = &jd
 	leapYear := c.isLeapYear()
 	c.LeapYear = &leapYear
+
+	c.GetSolarDate()
+	c.GetLunarDate()
 	return c
 }
 
@@ -66,56 +71,18 @@ func (c *Calendar) calculateJD() float64 {
 	return float64(INT(365.25*float64(year))) + float64(INT(30.6001*float64(month+1))) + float64(day) + 1720994.5 + float64(B)
 }
 
-func GetLunarMonthDays(year, month int) int {
-	// Logic to get the number of days in a lunar month
-	// ...existing code...
-	return 0 // Placeholder
-}
-
-func GetSolarTerm(date time.Time) string {
-	// Logic to get the solar term for a given date
-	// ...existing code...
-	return "" // Placeholder
-}
-
 func (c *Calendar) ToLunar() *LunarDate {
-	// Conversion logic from solar to lunar date
-	// ...existing code...
-	return &LunarDate{} // Placeholder
+	return c.LunarDate
 }
 
-func (c *Calendar) FromLunar(lunarDate *LunarDate) *Calendar {
-	// Conversion logic from lunar to solar date
-	// ...existing code...
-	return &Calendar{} // Placeholder
+func (c *Calendar) GetSolarDate() {
+	c.SoalrDate = NewSolarDate(c.Year, c.Month, c.Day)
 }
 
-func (c *Calendar) GetSolarDate() *SolarDate {
-	// Logic to get the solar date
-	// ...existing code...
-	return &SolarDate{} // Placeholder
-}
-
-func (c *Calendar) GetLunarDate() *LunarDate {
-	// Logic to get the lunar date
-	// ...existing code...
-	return &LunarDate{} // Placeholder
-}
-
-func (c *Calendar) GetSolarTerm() string {
-	// Logic to get the solar term
-	// ...existing code...
-	return "" // Placeholder
+func (c *Calendar) GetLunarDate() {
+	c.LunarDate = c.ToLunar()
 }
 
 func (c *Calendar) ToSolar() *SolarDate {
-	// Conversion logic from lunar to solar date
-	// ...existing code...
-	return &SolarDate{} // Placeholder
-}
-
-func (c *Calendar) FromSolar(solarDate *SolarDate) *Calendar {
-	// Conversion logic from solar to lunar date
-	// ...existing code...
-	return &Calendar{} // Placeholder
+	return c.SoalrDate
 }

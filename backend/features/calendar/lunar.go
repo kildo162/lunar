@@ -4,8 +4,6 @@ import (
 	"fmt"
 )
 
-// ...other imports if needed...
-
 type LunarDate struct {
 	Year  int
 	Month int
