@@ -3,12 +3,10 @@ package features
 import (
 	"backend/shared"
 	"encoding/json"
-	"log"
 	"net/http"
 )
 
 func HandleSetupTelegram(w http.ResponseWriter, r *http.Request) {
-	log.Println("Received API request: /api/setup-telegram")
 	var request struct {
 		ChatID string `json:"chat_id"`
 	}

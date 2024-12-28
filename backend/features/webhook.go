@@ -8,7 +8,6 @@ import (
 )
 
 func HandleWebhook(w http.ResponseWriter, r *http.Request) {
-	log.Println("Received API request: /api/webhook")
 	var update shared.TelegramUpdate
 	if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
 		response := shared.NewError(shared.BAD_REQUEST.Code(), "Invalid request payload")

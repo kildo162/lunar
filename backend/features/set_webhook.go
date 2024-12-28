@@ -3,12 +3,10 @@ package features
 import (
 	"backend/shared"
 	"encoding/json"
-	"log"
 	"net/http"
 )
 
 func HandleSetWebhook(w http.ResponseWriter, r *http.Request) {
-	log.Println("Received API request: /api/set-webhook")
 	var request struct {
 		URL string `json:"url"`
 	}
