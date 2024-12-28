@@ -29,20 +29,6 @@ func main() {
 		shared.TelegramBot.InitChatIDsFromEnv()
 	}
 
-	// Send deployment success message
-	go func() {
-		err := shared.TelegramBot.SendMessage("🚀 Deploy Successfully 🎉\nServer is up and running on port 8080")
-		if err != nil {
-			log.Printf("Failed to send deployment success message: %v", err)
-		}
-
-		// Re-set the webhook to ensure it's always up-to-date
-		err = shared.TelegramBot.SetWebhook(os.Getenv("WEBHOOK_URL"))
-		if err != nil {
-			log.Printf("Failed to set webhook: %v", err)
-		}
-	}()
-
 	http.HandleFunc("/api", logRequest(features.HandleAPI))
 	http.HandleFunc("/api/healthz", logRequest(features.HandleHealthz))
 	http.HandleFunc("/api/telegram/setup", logRequest(features.HandleSetupTelegram))
@@ -56,6 +42,9 @@ func main() {
 			log.Fatal("ListenAndServe: ", err)
 		}
 	}()
+
+	// Send deployment success message
+	go shared.SendDeploymentSuccessMessage()
 
 	select {} // Block forever to keep the main function running
 }

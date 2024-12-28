@@ -1,6 +1,7 @@
 package features
 
 import (
+	"backend/features/calendar"
 	"backend/shared"
 	"encoding/json"
 	"fmt"
@@ -47,8 +48,7 @@ func HandleWebhook(w http.ResponseWriter, r *http.Request) {
 			log.Printf("Sent message: %s", responseMessage)
 		}
 	case "/today":
-		gregorianDate := time.Now().Format("2006-01-02")
-		responseMessage := fmt.Sprintf("Today's date:\nGregorian: %s\nLunar: %s", gregorianDate, "N/A")
+		responseMessage := getTodayDateInfo()
 		err := shared.TelegramBot.SendMessageToChatID(fmt.Sprintf("%d", update.Message.Chat.ID), responseMessage)
 		if err != nil {
 			log.Printf("Error sending message: %v", err)
@@ -68,4 +68,18 @@ func HandleWebhook(w http.ResponseWriter, r *http.Request) {
 	response := shared.OK
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
+}
+
+func getTodayDateInfo() string {
+	now := time.Now()
+	solarDate := calendar.NewCalendar(calendar.CalendarDate{
+		Day:   now.Day(),
+		Month: int(now.Month()),
+		Year:  now.Year(),
+	})
+	lunarDate := solarDate.ToLunar()
+
+	return fmt.Sprintf("Today's date:\nGregorian: %d-%02d-%02d\nLunar: %d-%02d-%02d",
+		solarDate.Year, solarDate.Month, solarDate.Day,
+		lunarDate.Year, lunarDate.Month, lunarDate.Day)
 }

@@ -18,18 +18,6 @@ func NewSolarDate(year, month, day int) *SolarDate {
 	}
 }
 
-func (sd *SolarDate) ToLunar() *LunarDate {
-	// Conversion logic from solar to lunar date
-	// ...existing code...
-	return &LunarDate{} // Placeholder
-}
-
-func FromLunar(lunarDate *LunarDate) *SolarDate {
-	// Conversion logic from lunar to solar date
-	// ...existing code...
-	return &SolarDate{} // Placeholder
-}
-
 func (sd *SolarDate) IsLeapYear() bool {
 	year := sd.Year
 	return (year%4 == 0 && year%100 != 0) || (year%400 == 0)
