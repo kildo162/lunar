@@ -1,4 +1,4 @@
-package lunar
+package shared
 
 import "fmt"
 

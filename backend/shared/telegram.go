@@ -88,3 +88,50 @@ func (t *Telegram) InitAllChatIDs() {
 		t.AddChatID(chatID)
 	}
 }
+
+func (t *Telegram) SetWebhook(url string) error {
+	payload := map[string]string{
+		"url": url,
+	}
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("error encoding payload: %v", err)
+	}
+
+	apiURL := fmt.Sprintf("https://api.telegram.org/bot%s/setWebhook", t.BotToken)
+	resp, err := http.Post(apiURL, "application/json", bytes.NewBuffer(payloadBytes))
+	if err != nil {
+		return fmt.Errorf("error sending request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("error: %s", resp.Status)
+	}
+
+	return nil
+}
+
+type TelegramUpdate struct {
+	UpdateID int `json:"update_id"`
+	Message  struct {
+		MessageID int `json:"message_id"`
+		From      struct {
+			ID        int    `json:"id"`
+			FirstName string `json:"first_name"`
+			LastName  string `json:"last_name"`
+			Username  string `json:"username"`
+		} `json:"from"`
+		Chat struct {
+			ID   int    `json:"id"`
+			Type string `json:"type"`
+		} `json:"chat"`
+		Date     int    `json:"date"`
+		Text     string `json:"text"`
+		Entities []struct {
+			Type   string `json:"type"`
+			Offset int    `json:"offset"`
+			Length int    `json:"length"`
+		} `json:"entities"`
+	} `json:"message"`
+}

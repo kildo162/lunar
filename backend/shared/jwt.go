@@ -10,8 +10,6 @@ import (
 	"log"
 	"strings"
 	"time"
-
-	core "lunar/core"
 )
 
 type Data struct {
@@ -31,7 +29,7 @@ func NewJWT(secretKey string) *JWT {
 
 // [header.data.signature]
 // expired: time duration
-func (j *JWT) CreateToken(ssid string, expired time.Duration, role string) (string, core.Error) {
+func (j *JWT) CreateToken(ssid string, expired time.Duration, role string) (string, Error) {
 
 	expiredDuration := expired
 	if expiredDuration == 0 || expiredDuration > 24*time.Hour || expiredDuration < 5*time.Minute {
@@ -43,7 +41,7 @@ func (j *JWT) CreateToken(ssid string, expired time.Duration, role string) (stri
 	nonce, err := generateNonce()
 	if err != nil {
 		log.Println("failed to create token - nonce: " + err.Error())
-		return "", core.SERVER_ERROR
+		return "", SERVER_ERROR
 	}
 
 	claims := Data{
@@ -61,7 +59,7 @@ func (j *JWT) CreateToken(ssid string, expired time.Duration, role string) (stri
 	headerBytes, err := json.Marshal(header)
 	if err != nil {
 		log.Println("failed to create token - header: " + err.Error())
-		return "", core.SERVER_ERROR
+		return "", SERVER_ERROR
 	}
 
 	encodedHeader := base64.URLEncoding.EncodeToString(headerBytes)
@@ -69,7 +67,7 @@ func (j *JWT) CreateToken(ssid string, expired time.Duration, role string) (stri
 	bodyBytes, err := json.Marshal(claims)
 	if err != nil {
 		log.Println("failed to create token - verify: " + err.Error())
-		return "", core.SERVER_ERROR
+		return "", SERVER_ERROR
 	}
 
 	encodedData := base64.URLEncoding.EncodeToString(bodyBytes)
@@ -82,10 +80,10 @@ func (j *JWT) CreateToken(ssid string, expired time.Duration, role string) (stri
 	return token, nil
 }
 
-func (j *JWT) VerifyToken(token string) (Data, core.Error) {
+func (j *JWT) VerifyToken(token string) (Data, Error) {
 	parts := strings.Split(token, ".")
 	if len(parts) != 3 {
-		return Data{}, core.PERMISSION_ERROR
+		return Data{}, PERMISSION_ERROR
 	}
 
 	encodedHeader := parts[0]
@@ -95,42 +93,42 @@ func (j *JWT) VerifyToken(token string) (Data, core.Error) {
 	signatureInput := fmt.Sprintf("%s.%s", encodedHeader, encodedData)
 	if !j.verifyHMACSHA256(signatureInput, signature) {
 		log.Println("invalid signature")
-		return Data{}, core.PERMISSION_ERROR
+		return Data{}, PERMISSION_ERROR
 	}
 
 	headerBytes, err := base64.URLEncoding.DecodeString(encodedHeader)
 	if err != nil {
 		log.Println("failed to decode token - header: " + err.Error())
-		return Data{}, core.PERMISSION_ERROR
+		return Data{}, PERMISSION_ERROR
 	}
 
 	claimsBytes, err := base64.URLEncoding.DecodeString(encodedData)
 	if err != nil {
 		log.Println("failed to decode token - header: " + err.Error())
-		return Data{}, core.PERMISSION_ERROR
+		return Data{}, PERMISSION_ERROR
 	}
 
 	var header map[string]interface{}
 	err = json.Unmarshal(headerBytes, &header)
 	if err != nil {
 		log.Println("failed to decode token - header: " + err.Error())
-		return Data{}, core.PERMISSION_ERROR
+		return Data{}, PERMISSION_ERROR
 	}
 
 	if alg, ok := header["alg"].(string); !ok || alg != "HS256" {
 		log.Println("unsupported signing algorithm")
-		return Data{}, core.PERMISSION_ERROR
+		return Data{}, PERMISSION_ERROR
 	}
 
 	var claims Data
 	err = json.Unmarshal(claimsBytes, &claims)
 	if err != nil {
 		log.Println("failed to verify token: " + err.Error())
-		return Data{}, core.PERMISSION_ERROR
+		return Data{}, PERMISSION_ERROR
 	}
 
 	if time.Now().Unix() > claims.Exp {
-		return Data{}, core.PERMISSION_ERROR
+		return Data{}, PERMISSION_ERROR
 	}
 
 	return claims, nil
