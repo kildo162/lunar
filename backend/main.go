@@ -15,6 +15,24 @@ func logRequest(handler http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+// func main() {
+// 	now := time.Now()
+// 	calendar := calendar.NewCalendar(calendar.CalendarDate{
+// 		Day:      now.Day(),
+// 		Month:    int(now.Month()),
+// 		Year:     now.Year(),
+// 		TimeZone: +7,
+// 		Hour:     now.Hour(),
+// 		Min:      now.Minute(),
+// 		Second:   now.Second(),
+// 	})
+// 	solarDate := calendar.ToSolar()
+// 	lunarDate := calendar.ToLunar()
+
+// 	log.Println(solarDate.Detail())
+// 	log.Println(lunarDate.Detail())
+// }
+
 func main() {
 	log.Println("Starting server...")
 

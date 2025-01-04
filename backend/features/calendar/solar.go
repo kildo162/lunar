@@ -5,18 +5,24 @@ import (
 	"time"
 )
 
+var TUAN = []string{"Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"}
+
 type SolarDate struct {
-	Year  int
-	Month int
-	Day   int
+	Year     int
+	Month    int
+	Day      int
+	LeapYear bool
 }
 
 func NewSolarDate(year, month, day int) *SolarDate {
-	return &SolarDate{
-		Year:  year,
-		Month: month,
-		Day:   day,
+	s := SolarDate{
+		Year:     year,
+		Month:    month,
+		Day:      day,
+		LeapYear: false,
 	}
+	s.LeapYear = s.IsLeapYear()
+	return &s
 }
 
 func (sd *SolarDate) IsLeapYear() bool {
@@ -41,17 +47,7 @@ func (sd *SolarDate) GetWeekday() time.Weekday {
 	return currentDate.Weekday()
 }
 
-func (sd *SolarDate) Format() string {
-	return fmt.Sprintf("%02d-%02d-%d", sd.Day, sd.Month, sd.Year)
-}
-
 func (sd *SolarDate) Detail() string {
-	return fmt.Sprintf(
-		"Year: %d, Month: %d, Day: %d, Week of Year: %d, Day of Year: %d",
-		sd.Year, sd.Month, sd.Day, sd.GetWeekOfYear(), sd.GetDayOfYear(),
-	)
-}
-
-func (sd *SolarDate) YearInfo() string {
-	return fmt.Sprintf("Year: %d, Leap Year: %t", sd.Year, sd.IsLeapYear())
+	weekday := TUAN[sd.GetWeekday()]
+	return fmt.Sprintf("Dương Lịch: %s, %02d/%02d/%d", weekday, sd.Day, sd.Month, sd.Year)
 }
