@@ -254,6 +254,11 @@ func convertLunar2Solar(lunarDay, lunarMonth, lunarYear, lunarLeap int, timeZone
 	return JDToDate(monthStart + lunarDay - 1)
 }
 
+// ConvertLunar2Solar is the public function to convert lunar date to solar date
+func ConvertLunar2Solar(lunarDay, lunarMonth, lunarYear, lunarLeap int, timeZone float64) (int, int, int) {
+	return convertLunar2Solar(lunarDay, lunarMonth, lunarYear, lunarLeap, timeZone)
+}
+
 func (l *LunarDate) GetCanChiYear() string {
 	return CAN[(l.LunarYear+6)%10] + " " + CHI[(l.LunarYear+8)%12]
 }

@@ -15,24 +15,6 @@ func logRequest(handler http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// func main() {
-// 	now := time.Now()
-// 	calendar := calendar.NewCalendar(calendar.CalendarDate{
-// 		Day:      now.Day(),
-// 		Month:    int(now.Month()),
-// 		Year:     now.Year(),
-// 		TimeZone: +7,
-// 		Hour:     now.Hour(),
-// 		Min:      now.Minute(),
-// 		Second:   now.Second(),
-// 	})
-// 	solarDate := calendar.ToSolar()
-// 	lunarDate := calendar.ToLunar()
-
-// 	log.Println(solarDate.Detail())
-// 	log.Println(lunarDate.Detail())
-// }
-
 func main() {
 	log.Println("Starting server...")
 
@@ -49,9 +31,14 @@ func main() {
 
 	http.HandleFunc("/api", logRequest(features.HandleAPI))
 	http.HandleFunc("/api/healthz", logRequest(features.HandleHealthz))
-	http.HandleFunc("/api/telegram/setup", logRequest(features.HandleSetupTelegram))
-	http.HandleFunc("/api/telegram/set-webhook", logRequest(features.HandleSetWebhook))
-	http.HandleFunc("/api/telegram/webhook", logRequest(features.HandleWebhook))
+	http.HandleFunc("/api/calendar/today", logRequest(features.HandleGetToday))
+	http.HandleFunc("/api/calendar/solar-to-lunar", logRequest(features.HandleConvertToLunar))
+	http.HandleFunc("/api/calendar/lunar-to-solar", logRequest(features.HandleConvertToSolar))
+	http.HandleFunc("/api/calendar/month", logRequest(features.HandleGetMonthCalendar))
+	http.HandleFunc("/api/calendar/good-days", logRequest(features.HandleSearchGoodDays))
+	// http.HandleFunc("/api/telegram/setup", logRequest(features.HandleSetupTelegram))
+	// http.HandleFunc("/api/telegram/set-webhook", logRequest(features.HandleSetWebhook))
+	// http.HandleFunc("/api/telegram/webhook", logRequest(features.HandleWebhook))
 
 	go func() {
 		log.Println("Listening on port 8080...")
@@ -62,7 +49,7 @@ func main() {
 	}()
 
 	// Send deployment success message
-	go shared.SendDeploymentSuccessMessage()
+	// go shared.SendDeploymentSuccessMessage()
 
 	select {} // Block forever to keep the main function running
 }
