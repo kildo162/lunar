@@ -1,19 +1,17 @@
 package main
 
 import (
-	"backend/features"
+	"backend/features/api"
 	"backend/shared"
 	"log"
 	"net/http"
 	"os"
-)
 
-func logRequest(handler http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("Received API request: %s %s", r.Method, r.URL.Path)
-		handler(w, r)
-	}
-}
+	customMiddleware "backend/features/middleware"
+
+	"github.com/go-chi/chi/v5"
+	chiMiddleware "github.com/go-chi/chi/v5/middleware"
+)
 
 func main() {
 	log.Println("Starting server...")
@@ -29,27 +27,31 @@ func main() {
 		shared.TelegramBot.InitChatIDsFromEnv()
 	}
 
-	http.HandleFunc("/api", logRequest(features.HandleAPI))
-	http.HandleFunc("/api/healthz", logRequest(features.HandleHealthz))
-	http.HandleFunc("/api/calendar/today", logRequest(features.HandleGetToday))
-	http.HandleFunc("/api/calendar/solar-to-lunar", logRequest(features.HandleConvertToLunar))
-	http.HandleFunc("/api/calendar/lunar-to-solar", logRequest(features.HandleConvertToSolar))
-	http.HandleFunc("/api/calendar/month", logRequest(features.HandleGetMonthCalendar))
-	http.HandleFunc("/api/calendar/good-days", logRequest(features.HandleSearchGoodDays))
-	// http.HandleFunc("/api/telegram/setup", logRequest(features.HandleSetupTelegram))
-	// http.HandleFunc("/api/telegram/set-webhook", logRequest(features.HandleSetWebhook))
-	// http.HandleFunc("/api/telegram/webhook", logRequest(features.HandleWebhook))
+	r := chi.NewRouter()
+	r.Use(chiMiddleware.Logger)
+	r.Use(chiMiddleware.Recoverer)
+	r.Use(chiMiddleware.Timeout(60 * 1e9)) // 60s timeout
+	r.Use(customMiddleware.CORSMiddleware)
+	r.Get("/api", http.HandlerFunc(api.HandleAPI))
+	r.Get("/api/healthz", http.HandlerFunc(api.HandleHealthz))
+	r.Get("/api/calendar/today", http.HandlerFunc(api.HandleGetToday))
+	r.Method("GET", "/api/calendar/solar-to-lunar", http.HandlerFunc(api.HandleConvertToLunar))
+	r.Method("POST", "/api/calendar/solar-to-lunar", http.HandlerFunc(api.HandleConvertToLunar))
+	r.Method("GET", "/api/calendar/lunar-to-solar", http.HandlerFunc(api.HandleConvertToSolar))
+	r.Method("POST", "/api/calendar/lunar-to-solar", http.HandlerFunc(api.HandleConvertToSolar))
+	r.Method("GET", "/api/calendar/month", http.HandlerFunc(api.HandleGetMonthCalendar))
+	r.Method("POST", "/api/calendar/month", http.HandlerFunc(api.HandleGetMonthCalendar))
+	r.Method("GET", "/api/calendar/good-days", http.HandlerFunc(api.HandleSearchGoodDays))
+	r.Method("POST", "/api/calendar/good-days", http.HandlerFunc(api.HandleSearchGoodDays))
+	// r.Method("GET", "/api/telegram/setup", features.HandleSetupTelegram)
+	// r.Method("POST", "/api/telegram/setup", features.HandleSetupTelegram)
+	// r.Method("GET", "/api/telegram/set-webhook", features.HandleSetWebhook)
+	// r.Method("POST", "/api/telegram/set-webhook", features.HandleSetWebhook)
+	// r.Method("POST", "/api/telegram/webhook", features.HandleWebhook)
 
-	go func() {
-		log.Println("Listening on port 8080...")
-		err := http.ListenAndServe(":8080", nil)
-		if err != nil {
-			log.Fatal("ListenAndServe: ", err)
-		}
-	}()
-
-	// Send deployment success message
-	// go shared.SendDeploymentSuccessMessage()
-
-	select {} // Block forever to keep the main function running
+	log.Println("Listening on port 8080...")
+	err := http.ListenAndServe(":8080", r)
+	if err != nil {
+		log.Fatal("ListenAndServe: ", err)
+	}
 }
