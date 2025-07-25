@@ -120,8 +120,24 @@ func ConvertToSolarService(w http.ResponseWriter, r *http.Request) {
 
 // Lấy thông tin ngày hôm nay
 func GetTodayService(w http.ResponseWriter, r *http.Request) {
-	// ... business logic ...
-	w.Write([]byte("GetTodayService called"))
+	// Lấy ngày hiện tại
+	today := calendar.GetToday()
+	resp := struct {
+		SolarDate string   `json:"solarDate"`
+		LunarDate string   `json:"lunarDate"`
+		CanChi    string   `json:"canChi"`
+		GoodHours []string `json:"goodHours"`
+		BadHours  []string `json:"badHours"`
+	}{
+		SolarDate: today.SolarDate,
+		LunarDate: today.LunarDate,
+		CanChi:    today.CanChi,
+		GoodHours: today.GoodHours,
+		BadHours:  today.BadHours,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(resp)
 }
 
 // Lấy lịch tháng

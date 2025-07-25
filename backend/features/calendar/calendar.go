@@ -1,14 +1,38 @@
 package calendar
 
-type CalendarDate struct {
-	Day      int
-	Month    int
-	Year     int
-	Hour     int
-	Min      int
-	Second   int
-	TimeZone float64
+import (
+	"time"
+)
+
+type TodayInfo struct {
+	SolarDate string
+	LunarDate string
+	CanChi    string
+	GoodHours []string
+	BadHours  []string
 }
+
+func GetToday() TodayInfo {
+	now := time.Now()
+	year, month, day := now.Year(), int(now.Month()), now.Day()
+	// Tạo SolarDate
+	solar := NewSolarDate(year, month, day)
+	// Tạo LunarDate
+	lunar := NewLunarDate(year, month, day, now.Hour(), now.Minute(), now.Second(), 7.0)
+	// Can Chi
+	canChi := lunar.GetCanChiYear() + " " + lunar.GetCanChiMonth() + " " + lunar.GetCanDay()
+	// Giờ hoàng đạo/hắc đạo (giả lập, cần sửa lại nếu có logic)
+	goodHours := []string{"Tý", "Sửu", "Thìn", "Tỵ", "Mùi", "Tuất"}
+	badHours := []string{"Dần", "Mão", "Ngọ", "Thân", "Dậu", "Hợi"}
+	return TodayInfo{
+		SolarDate: solar.Detail(),
+		LunarDate: lunar.Detail(),
+		CanChi:    canChi,
+		GoodHours: goodHours,
+		BadHours:  badHours,
+	}
+}
+
 
 type Calendar struct {
 	SoalrDate *SolarDate
